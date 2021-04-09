@@ -25,16 +25,14 @@ album = api.photos.albums[account["album"]] if account["album"] else api.photos.
 dest = Path(account["dest"]).resolve()
 
 session = requests.Session()
-for photo in tqdm(album.photos, total=len(album), desc=account["username"]):
+for photo in tqdm(album.photos, total=len(album), desc=account["username"], unit="p"):
     try:
-        filename = photo._asset_record["fields"]["resJPEGFullFileType"]["value"]
-        photo_dest_path = get_path(photo.id, photo.created, filename, dest)
+        filename = photo._asset_record["fields"]["resJPEGFullFileType"]["value"]    # "public.heic" or "public.jpeg"
+        photo_dest_path = get_path(photo.id, photo.created, filename, dest, "_E")
         url = photo._asset_record["fields"]["resJPEGFullRes"]["value"]["downloadURL"]
-        use_original = False
     except KeyError:
         photo_dest_path = get_path(photo.id, photo.created, photo.filename, dest)
         url = photo.versions["original"]["url"]
-        use_original = True
 
     if photo_dest_path.exists():
         continue
@@ -42,7 +40,8 @@ for photo in tqdm(album.photos, total=len(album), desc=account["username"]):
     with session.get(url, stream=True) as req:
         req.raise_for_status()
         with photo_dest_path.open("wb") as fp:
-            pbar = tqdm(total=int(req.headers["Content-Length"]), desc=photo_dest_path.name)
+            pbar = tqdm(total=int(req.headers["Content-Length"]), desc=photo_dest_path.name,
+                        bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}")
             for chunk in req.iter_content(32768):
                 fp.write(chunk)
                 pbar.update(len(chunk))
