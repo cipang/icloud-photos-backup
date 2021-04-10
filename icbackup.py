@@ -71,7 +71,9 @@ for photo in (main_pbar := tqdm(album.photos, total=len(album), desc=arguments.u
     except KeyError:
         pass
 
+    logger.debug(f"Proceed with {len(download_list)} task(s):")
     for task in download_list:
+        logger.debug(f"Task: {t.photo_id=}; {t.created=}; {t.cloud_filename=}; {t.suffix=}.")
         photo_dest_path = task.get_path(dest)
         if photo_dest_path.exists():
             skip_count += 1
