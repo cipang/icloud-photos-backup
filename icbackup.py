@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from typing import List
 
@@ -55,11 +56,22 @@ for photo in tqdm(album.photos, total=len(album), desc=account.username, unit="p
             continue
 
         repeat_count = 0  # Reset repeat count if file does not exist.
-        with session.get(task.url, stream=True) as req:
-            req.raise_for_status()
-            pbar = tqdm(total=int(req.headers["Content-Length"]), desc=photo_dest_path.name, leave=False,
-                        bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}")
-            with photo_dest_path.open("wb") as fp, pbar:
-                for chunk in req.iter_content(32768):
-                    fp.write(chunk)
-                    pbar.update(len(chunk))
+        attempts = 0    # Record how many attempts it has tried.
+        download_done = False
+        while not download_done:
+            attempts += 1
+            with session.get(task.url, stream=True) as req:
+                if req.ok:
+                    pbar = tqdm(total=int(req.headers["Content-Length"]), desc=photo_dest_path.name, leave=False,
+                                bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}")
+                    with photo_dest_path.open("wb") as fp, pbar:
+                        for chunk in req.iter_content(32768):
+                            fp.write(chunk)
+                            pbar.update(len(chunk))
+                    pbar.close()
+                    download_done = True
+                elif attempts <= 3:
+                    print(f"Attempt #{attempts} failed. Waiting for retry...")
+                    time.sleep(20)
+                else:
+                    req.raise_for_status()
