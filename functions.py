@@ -1,5 +1,4 @@
 import hashlib
-import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -34,10 +33,3 @@ def sha1_id(s: str, length=7) -> str:
 
 def datetime_to_string(d: datetime) -> str:
     return d.strftime("%Y%m%d_%H%M%S")
-
-
-def get_account(filename: str, index: int) -> Account:
-    with open(filename, "r") as accounts_fp:
-        account = json.load(accounts_fp)[index]
-        return Account(username=account["username"], dest=account["dest"], album=account["album"] or None,
-                       repeat_limit=int(account["repeat_limit"]))
