@@ -69,7 +69,7 @@ for photo in tqdm(album.photos, total=len(album), desc=account.username, unit="p
                     pbar = tqdm(total=int(req.headers["content-length"]), desc=photo_dest_path.name, leave=False,
                                 bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}")
                     with photo_dest_path.open("wb") as fp, pbar:
-                        for chunk in req.iter_content(32768):
+                        for chunk in req.iter_content(65536):
                             fp.write(chunk)
                             pbar.update(len(chunk))
                     ok = True
