@@ -19,8 +19,9 @@ dest = Path(arguments.dest).resolve(strict=True)
 
 session = requests.Session()
 skip_count = 0
-for photo in tqdm(album.photos, total=len(album), desc=arguments.username, unit="p"):
+for photo in (main_pbar := tqdm(album.photos, total=len(album), desc=arguments.username, unit="p")):
     if 0 < arguments.skip_limit <= skip_count:
+        main_pbar.close()
         logger.info(msg := f"Found {skip_count} repeated images. Download stopped.")
         print(msg)
         break
@@ -49,10 +50,24 @@ for photo in tqdm(album.photos, total=len(album), desc=arguments.username, unit=
                              photo._master_record["fields"]["resOriginalVidComplRes"]["value"]["downloadURL"])
             download_list.append(t)
             for t in download_list:
-                t.suffix = "_LP"
+                t.suffix = "_LP"    # Add LP suffix to both the photo and the video.
         else:
             logger.error(msg := f"Unknown live photo type for {photo}: {file_type}.")
             raise RuntimeError(msg)
+    except KeyError:
+        pass
+
+    # Slow motions
+    try:
+        if photo._asset_record["fields"]["adjustmentType"]["value"] == "com.apple.video.slomo":
+            file_type = photo._asset_record["fields"]["resVidMedFileType"]["value"]
+            if file_type == "public.mpeg-4":
+                t = DownloadTask(photo.id, datetime_to_string(photo.created), "slow_motion.mp4",
+                                 photo._asset_record["fields"]["resVidMedRes"]["value"]["downloadURL"], "_SL")
+                download_list.append(t)
+            else:
+                logger.error(msg := f"Unknown slow motion type for {photo}: {file_type}.")
+                raise RuntimeError(msg)
     except KeyError:
         pass
 
