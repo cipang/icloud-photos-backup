@@ -1,6 +1,6 @@
 # iCloud Photos Backup Python Script
 
-Backup iCloud Photos to a local directory.
+Backup iCloud Photos to a local directory. Supports photos, videos, live photos and slow motion videos.
 
 ## Usage
 
