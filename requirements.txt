@@ -1,2 +1,2 @@
-pyicloud==0.10.2
-tqdm==4.60.0
+pyicloud==1.0.0
+tqdm==4.64.0
