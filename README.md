@@ -4,10 +4,12 @@ Backup iCloud Photos to a local directory. Supports photos, videos, live photos 
 
 ## Usage
 
-``python icbackup.py [-h] [-a ALBUM] [-l SKIP_LIMIT] [--log LOG] [--loglevel LOG_LEVEL] username dest``
+Note: For first time users, please run ``icloud --username your_apple_id`` to login first.
+
+``python icbackup.py [-h] [-a ALBUM] [-l SKIP_LIMIT] [--log LOG] [--loglevel LOG_LEVEL] your_apple_id dest``
 
 ## Requirements
 
-* Python 3.9+
+* Python 3.10
 * pyicloud
 * tqdm
